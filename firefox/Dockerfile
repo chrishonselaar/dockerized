@@ -46,6 +46,19 @@ RUN groupadd -g $gid $group; \
 RUN pacman --noprogressbar --noconfirm -Syu; \
      pacman --noprogressbar --noconfirm -S util-linux sed firefox
 
+RUN /bin/sh -c apt-get update && apt-get install -y util-linux sed xvfb x11vnc supervisor xterm xrdp novnc websockify firefox xpra flashplugin-installer && apt-get clean
+
+
+RUN ln -s /usr/share/novnc/vnc_lite.html /usr/share/novnc/index.html
+
+ADD supervisord.conf /etc/supervisord.conf
+ADD xrdp.ini /etc/xrdp/xrdp.ini
+
+RUN chmod +x /entry.sh
+
+ENV DISPLAY :0
+ENV RESOLUTION=1024x768
+
 # generate random uuid for this container
 RUN uuidgen | sed 's/\-//g' > /etc/machine-id
 
@@ -61,6 +74,8 @@ VOLUME /home/$user/.mozilla
 
 # set user
 USER $user
+
+EXPOSE 5901 6901
 
 # entrypoint
 ENTRYPOINT ["firefox"]
